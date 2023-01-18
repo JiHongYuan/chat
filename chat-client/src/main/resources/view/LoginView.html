@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<script>
+    function handlerLogin(){
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        app.handlerLogin(username, password);
+    }
+</script>
+<body>
+<h1>登录</h1>
+<div>
+    <div>
+        账号：
+        <input type="text" name="title" id="username">
+    </div>
+    <div>
+        密码：
+        <input type="text" name="description" id="password">
+    </div>
+    <button onclick="handlerLogin()">登录</button>
+    <button>注册</button>
+</div>
+</body>
+
+</html>
