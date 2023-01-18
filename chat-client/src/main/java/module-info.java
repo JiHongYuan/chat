@@ -1,6 +1,5 @@
 module org.github.jhy.chat.client {
     requires javafx.controls;
-    requires javafx.fxml;
     requires javafx.web;
     requires jdk.jsobject;
     requires com.fasterxml.jackson.databind;
