@@ -1,6 +1,7 @@
 package org.github.jhy.chat.server.model;
 
 import lombok.Data;
+import org.github.jhy.chat.common.model.UserStatus;
 
 /**
  * @author jihongyuan

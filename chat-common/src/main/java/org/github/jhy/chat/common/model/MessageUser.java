@@ -13,8 +13,23 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class MessageUser {
 
+    /** 用户名 */
     private String username;
 
+    /** 密码 */
     private String password;
+
+    /** 状态 */
+    private UserStatus status;
+
+    public MessageUser(String username, UserStatus status) {
+        this.username = username;
+        this.status = status;
+    }
+
+    public MessageUser(String username, String password) {
+        this.username = username;
+        this.password = password;
+    }
 
 }

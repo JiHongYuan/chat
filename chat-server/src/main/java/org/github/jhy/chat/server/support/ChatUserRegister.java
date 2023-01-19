@@ -3,6 +3,7 @@ package org.github.jhy.chat.server.support;
 import org.github.jhy.chat.server.IRegister;
 import org.github.jhy.chat.server.model.UserSession;
 
+import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -26,6 +27,10 @@ public class ChatUserRegister implements IRegister<UserSession> {
     @Override
     public UserSession get(String name) {
         return userHashMap.get(name);
+    }
+
+    public Collection<UserSession> getUsers() {
+        return userHashMap.values();
     }
 
 }

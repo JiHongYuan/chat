@@ -10,10 +10,9 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.github.jhy.chat.common.EventMessage;
 import org.github.jhy.chat.common.EventType;
-import org.github.jhy.chat.common.model.Message;
 import org.github.jhy.chat.common.model.MessageUser;
 
-import java.util.Scanner;
+import java.util.List;
 
 /**
  * 聊天室服务端
@@ -81,6 +80,25 @@ public class NettyChatClient {
         eventMessage.setBody(messageUser);
         try {
             return sendSync(eventMessage);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * 发送注册消息
+     *
+     * @param username
+     * @return msgId
+     */
+    public List<MessageUser> getUserList(String username) {
+        EventMessage eventMessage = EventMessage.builderEventType(EventType.GET_USER);
+        eventMessage.setTo(username);
+        eventMessage.setFrom("SERVER");
+        try {
+            EventMessage message = sendSync(eventMessage);
+            return (List<MessageUser>) message.getBody();
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             throw new RuntimeException(e);

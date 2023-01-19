@@ -12,5 +12,15 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Message {
+
+    private String code;
+
     private String msg;
+
+    private Object data;
+
+    public Message(String code, String msg) {
+        this.code = code;
+        this.msg = msg;
+    }
 }

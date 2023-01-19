@@ -5,10 +5,11 @@
     <title>Title</title>
 </head>
 <script>
+
     function handlerLogin(){
         const username = document.getElementById('username').value;
         const password = document.getElementById('password').value;
-        app.handlerLogin(username, password);
+        app.handlerLogin(username, password)
     }
 </script>
 <body>
@@ -23,7 +24,7 @@
         <input type="text" name="description" id="password">
     </div>
     <button onclick="handlerLogin()">登录</button>
-    <button>注册</button>
+    <button onclick="handlerLogin()">注册</button>
 </div>
 </body>
 

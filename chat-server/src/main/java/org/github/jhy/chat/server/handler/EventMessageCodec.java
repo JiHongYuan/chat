@@ -23,7 +23,11 @@ public class EventMessageCodec extends MessageToMessageCodec<ByteBuf, EventMessa
     @Override
     protected void encode(ChannelHandlerContext ctx, EventMessage msg, List<Object> out) throws Exception {
         if (log.isDebugEnabled()) {
-            log.info("Thread id: {}, encode: {}", Thread.currentThread().getId(), msg);
+            log.info("Thread name: {}, encode: {}", Thread.currentThread().getName(), msg);
+        }
+
+        if (msg.getBody() != null) {
+            msg.setBody(mapper.writeValueAsString(msg.getBody()));
         }
         String str = mapper.writeValueAsString(msg);
         out.add(Unpooled.copiedBuffer(str, CharsetUtil.UTF_8));
@@ -34,7 +38,7 @@ public class EventMessageCodec extends MessageToMessageCodec<ByteBuf, EventMessa
         String strMsg = msg.toString(CharsetUtil.UTF_8);
 
         if (log.isDebugEnabled()) {
-            log.info("Thread id: {}, decode: {}", Thread.currentThread().getId(), strMsg);
+            log.info("Thread name: {}, decode: {}", Thread.currentThread().getName(), strMsg);
         }
 
         EventMessage eventMessage = mapper.readValue(strMsg, EventMessage.class);

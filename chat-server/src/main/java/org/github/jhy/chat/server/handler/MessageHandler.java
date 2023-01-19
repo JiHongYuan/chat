@@ -3,13 +3,20 @@ package org.github.jhy.chat.server.handler;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.github.jhy.chat.common.EventMessage;
 import org.github.jhy.chat.common.EventType;
+import org.github.jhy.chat.common.model.Message;
+import org.github.jhy.chat.common.model.MessageUser;
 import org.github.jhy.chat.server.model.UserSession;
-import org.github.jhy.chat.server.model.UserStatus;
+import org.github.jhy.chat.common.model.UserStatus;
 import org.github.jhy.chat.server.support.ChannelClientRegister;
 import org.github.jhy.chat.server.support.ChatUserRegister;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author jihongyuan
@@ -21,7 +28,7 @@ public class MessageHandler {
     private static final ObjectMapper mapper = new ObjectMapper();
 
     private static final ChannelClientRegister channelClientRegister = new ChannelClientRegister();
-    private static final ChatUserRegister chatUserOnLineRegister = new ChatUserRegister();
+    private static final ChatUserRegister chatUserRegister = new ChatUserRegister();
 
     public void handlerActive(ChannelHandlerContext ctx) {
         Channel channel = ctx.channel();
@@ -45,25 +52,34 @@ public class MessageHandler {
 
         switch (eventType) {
             case REGISTER -> new RegisterHandler().handle(ctx, msg);
-            case MESSAGE -> System.out.println("");
+            case GET_ON_LINE_USER -> new GetUserHandler(UserStatus.OFFLINE).handle(ctx, msg);
+            case GET_USER -> new GetUserHandler().handle(ctx, msg);
         }
     }
 
     interface IEventHandler {
         default void handle(ChannelHandlerContext ctx, EventMessage msg) {
-            handlerRequest(ctx, msg);
-            handlerResult(ctx, msg);
+            EventMessage retMsg = getEventMessage(msg);
+            handlerRequest(ctx, msg, retMsg);
+            handlerResult(ctx, msg, retMsg);
         }
 
-        void handlerRequest(ChannelHandlerContext ctx, EventMessage msg);
+        default void handlerRequest(ChannelHandlerContext ctx, EventMessage msg, EventMessage retMsg) {
+        }
 
-        void handlerResult(ChannelHandlerContext ctx, EventMessage msg);
+        default void handlerResult(ChannelHandlerContext ctx, EventMessage msg, EventMessage retMsg){
+            ctx.channel().writeAndFlush(retMsg);
+        }
+
+        EventMessage getEventMessage(EventMessage msg);
     }
 
     private static class RegisterHandler implements IEventHandler {
-        public void handlerRequest(ChannelHandlerContext ctx, EventMessage msg) {
+
+        @Override
+        public void handlerRequest(ChannelHandlerContext ctx, EventMessage msg, EventMessage retMsg) {
             UserSession userSession;
-            if ((userSession = chatUserOnLineRegister.get(msg.getTo())) != null) {
+            if ((userSession = chatUserRegister.get(msg.getTo())) != null) {
                 userSession.setStatus(UserStatus.OFFLINE);
             } else {
                 userSession = new UserSession();
@@ -71,14 +87,46 @@ public class MessageHandler {
                 userSession.setUsername(msg.getTo());
                 userSession.setStatus(UserStatus.OFFLINE);
             }
-            chatUserOnLineRegister.register(msg.getTo(), userSession);
+            retMsg.setBody(new Message("0", "登录成功"));
+            chatUserRegister.register(msg.getTo(), userSession);
         }
 
-        public void handlerResult(ChannelHandlerContext ctx, EventMessage msg) {
-            EventMessage retMsg = EventMessage.builderEventType(msg.getMsgId(), EventType.SERVER_ANSWER);
+        @Override
+        public EventMessage getEventMessage(EventMessage msg) {
+            EventMessage retMsg = EventMessage.builderEventType(msg.getMsgId(), msg.getEventType());
             retMsg.setTo("SERVER");
             retMsg.setFrom(msg.getTo());
-            ctx.channel().writeAndFlush(retMsg).channel().newPromise();
+            return retMsg;
+        }
+    }
+
+    @AllArgsConstructor
+    private static class GetUserHandler implements IEventHandler {
+
+        private final UserStatus userStatus;
+
+        public GetUserHandler() {
+            this.userStatus = null;
+        }
+
+        @Override
+        public EventMessage getEventMessage(EventMessage msg) {
+            EventMessage retMsg = EventMessage.builderEventType(msg.getMsgId(),  msg.getEventType());
+            retMsg.setTo("SERVER");
+            retMsg.setFrom(msg.getTo());
+
+            List<MessageUser> userList;
+            Collection<UserSession> users = chatUserRegister.getUsers();
+            if (userStatus == null) {
+                userList = users.stream().map(k -> new MessageUser(k.getUsername(), k.getStatus())).collect(Collectors.toList());
+            } else {
+                userList = users.stream()
+                        .filter(k -> userStatus == k.getStatus())
+                        .map(k -> new MessageUser(k.getUsername(), k.getStatus()))
+                        .collect(Collectors.toList());
+            }
+            retMsg.setBody(userList);
+            return retMsg;
         }
     }
 

@@ -2,13 +2,113 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>聊天室</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.3.js" integrity="sha256-nQLuAZGRRcILA+6dMBOvcRh5Pe310sBpanc6+QBmyVM=" crossorigin="anonymous"></script>
+    <style>
+        body {
+            margin-top: 5px;
+        }
+    </style>
 </head>
 <script>
+    function showUserList(users) {
+        users = JSON.parse(users);
+        let element = document.getElementById('users');
+
+        let strHtml = "";
+        for (let i = 0; i < users.length; i++) {
+            let user = users[i];
+            strHtml +=
+                "<div class='user' >" +
+                "用户名：<span>" + user.username + "</span>" +
+                "状态：<span>" + user.status + "</span>" +
+                "</div>"
+        }
+        element.innerHTML = strHtml;
+    }
+
+    $(document).on("mouseover", ".user", function (event) {
+        $(this).css("border", "1px solid #000");
+    })
+
+    $(document).on("mouseout", ".user", function (event) {
+        $(this).css("border", "none");
+    })
+
 </script>
 <body>
 <h1>主页</h1>
-<div>
+<div class="container">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-header bg-primary mb-3 text-white">
+                    当前登录用户
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        <p class="list-group-item card-text" id="login-title">你好，</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" id="online">
+                <div class="card-header bg-success text-white">当前在线的其他用户</div>
+                <div class="card-body">
+                    <div class="list-group" id="users"></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">群发系统广播</div>
+                <div class="card-body">
+                    <input type="text" class="form-control" id="msg"/><br>
+                    <button id="broadcast" type="button" class="btn btn-primary">发送</button>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="col-md-9">
+            <div class="card">
+                <div class="card-header">
+                    <h7 class="card-title" id="talk-title"></h7>
+                </div>
+                <div class="card-body">
+                    <div class="card-title">
+                        <div class="well" id="talk-text" style="height:400px;overflow-y:scroll">
+                        </div>
+                    </div>
+                    <div class="card-text row">
+                        <div class="col"><input type="text" id="talk-info" class="form-control"/></div>
+                        <button id="send" type="button" class="btn btn-primary">发送</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLongTitle">用户名</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <input type="text" class="form-control" id="user-id"/><br>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" id="btn-ok" class="btn btn-primary">确定</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 </body>
 

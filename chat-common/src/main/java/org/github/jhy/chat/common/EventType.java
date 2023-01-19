@@ -13,8 +13,11 @@ public enum EventType {
 
     REGISTER(0, "注册"),
     MESSAGE(1, "消息"),
-    CLIENT_ANSWER(10, "客户端回答"),
-    SERVER_ANSWER(11, "服务器回答"),
+
+    GET_ON_LINE_USER(2, "获取在线用户"),
+
+    GET_USER(3, "获取所有用户"),
+
     ;
 
     private final int type;

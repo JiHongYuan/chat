@@ -1,6 +1,7 @@
 package org.github.jhy.chat.client.gui.controller;
 
 
+import lombok.extern.slf4j.Slf4j;
 import org.github.jhy.chat.client.netty.ApplicationContext;
 import org.github.jhy.chat.client.netty.NettyChatClient;
 import org.github.jhy.chat.client.gui.IController;
@@ -8,28 +9,22 @@ import org.github.jhy.chat.common.EventMessage;
 import org.github.jhy.chat.common.model.MessageUser;
 
 import java.net.URL;
-import java.util.concurrent.ExecutionException;
 
 /**
  * @author jihongyuan
  * @date 2023/1/11 16:17
  */
+@Slf4j
 public class LoginViewController implements IController {
 
     public static final String TITLE = "登录";
 
     private static final String VIEW_PATH = "/view/LoginView.html";
 
-    @Override
-    public URL getResource(Class<?> contextApp) {
-        return contextApp.getResource(VIEW_PATH);
-    }
-
     /**
      * 处理登录 到主界面的事件
      */
-    public synchronized void handlerLogin(String username, String password) throws InterruptedException, ExecutionException {
-
+    public void handlerLogin(String username, String password) throws InterruptedException {
         // 跳转页面
         NettyChatClient client = new NettyChatClient("127.0.0.1", 9999);
         client.run();
@@ -39,15 +34,16 @@ public class LoginViewController implements IController {
 
         ApplicationContext.setClient(client);
         ApplicationContext.getApp().showMainView();
+
     }
 
-    public void handleForgetPasswordAction() {
+    public void info(String msg) {
+        log.info(msg);
     }
 
-    /**
-     * 处理登录 到主界面的事件
-     */
-    public void handleRegistButtonAction() {
+    @Override
+    public URL getResource(Class<?> contextApp) {
+        return contextApp.getResource(VIEW_PATH);
     }
 
 }

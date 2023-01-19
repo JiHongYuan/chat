@@ -6,7 +6,7 @@ import javafx.scene.web.WebEngine;
 import netscape.javascript.JSObject;
 
 import java.net.URL;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -18,15 +18,11 @@ public interface IController {
     URL getResource(Class<?> contextApp);
 
     default List<ChangeListener<? super Worker.State>> getWebEngineListener(WebEngine engine) {
-        List<ChangeListener<? super Worker.State>> listeners = new ArrayList<>();
-
-        listeners.add((ov, oldState, newState) -> {
-            if (newState == Worker.State.SUCCEEDED) {
-                JSObject window = (JSObject) engine.executeScript("window");
-                window.setMember("app", this);
-            }
-        });
-        return listeners;
+        return Collections.emptyList();
     }
+
+    default void setWebEngine(WebEngine engine){}
+
+    default void setJSObject(JSObject jsObject){}
 
 }
