@@ -39,7 +39,7 @@ public abstract class AbstractController implements IController {
     public void initialize() {
     }
 
-    protected void info(String msg) {
+    public final void info(String msg) {
         log.info(msg);
     }
 

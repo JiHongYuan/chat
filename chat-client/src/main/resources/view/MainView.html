@@ -12,6 +12,8 @@
     </style>
 </head>
 <script>
+    let selected = null;
+
     function showUserList(users) {
         users = JSON.parse(users);
         let element = document.getElementById('users');
@@ -19,8 +21,9 @@
         let strHtml = "";
         for (let i = 0; i < users.length; i++) {
             let user = users[i];
+            let id = "user_" + (i + 1)
             strHtml +=
-                "<div class='user' >" +
+                "<div " + " id='" + id + "'" + " class='user' >" +
                 "用户名：<span>" + user.username + "</span>" +
                 "状态：<span>" + user.status + "</span>" +
                 "</div>"
@@ -33,7 +36,22 @@
     })
 
     $(document).on("mouseout", ".user", function (event) {
-        $(this).css("border", "none");
+        if(selected == null || selected !== $(this).attr("id")){
+            $(this).css("border", "none");
+        }
+    })
+
+    $(document).on("click", ".user", function (event) {
+        let id = $(this).attr("id");
+
+        if (selected === id) {
+            selected = null;
+            $(this).css("border", "none");
+        } else {
+            selected = id;
+            $(".user").css("border", "none");
+            $(this).css("border", "1px solid #000");
+        }
     })
 
 </script>
