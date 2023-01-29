@@ -6,7 +6,6 @@ import javafx.scene.web.WebEngine;
 import netscape.javascript.JSObject;
 
 import java.net.URL;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -15,14 +14,29 @@ import java.util.List;
  */
 public interface IController {
 
+    /**
+     * 获取 view资源
+     *
+     * @param contextApp app class
+     * @return view URL
+     */
     URL getResource(Class<?> contextApp);
 
-    default List<ChangeListener<? super Worker.State>> getWebEngineListener(WebEngine engine) {
-        return Collections.emptyList();
-    }
+    /**
+     * 获取 web engine 监听器列表
+     *
+     * @param engine web engine
+     * @return listener
+     */
+    List<ChangeListener<? super Worker.State>> getWebEngineListener(WebEngine engine);
 
-    default void setWebEngine(WebEngine engine){}
+    void setWebEngine(WebEngine engine);
 
-    default void setJSObject(JSObject jsObject){}
+    void setJSObject(JSObject jsObject);
+
+    /**
+     * web engine 初始化
+     */
+    void initialize();
 
 }

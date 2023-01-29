@@ -2,9 +2,9 @@ package org.github.jhy.chat.client.gui.controller;
 
 
 import lombok.extern.slf4j.Slf4j;
+import org.github.jhy.chat.client.gui.AbstractController;
 import org.github.jhy.chat.client.netty.ApplicationContext;
 import org.github.jhy.chat.client.netty.NettyChatClient;
-import org.github.jhy.chat.client.gui.IController;
 import org.github.jhy.chat.common.EventMessage;
 import org.github.jhy.chat.common.model.MessageUser;
 
@@ -15,7 +15,7 @@ import java.net.URL;
  * @date 2023/1/11 16:17
  */
 @Slf4j
-public class LoginViewController implements IController {
+public class LoginViewController extends AbstractController {
 
     public static final String TITLE = "登录";
 
@@ -34,12 +34,8 @@ public class LoginViewController implements IController {
 
         ApplicationContext.setClient(client);
         ApplicationContext.getApp().showMainView();
-
     }
 
-    public void info(String msg) {
-        log.info(msg);
-    }
 
     @Override
     public URL getResource(Class<?> contextApp) {

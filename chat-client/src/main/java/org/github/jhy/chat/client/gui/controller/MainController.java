@@ -3,8 +3,7 @@ package org.github.jhy.chat.client.gui.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import netscape.javascript.JSObject;
-import org.github.jhy.chat.client.gui.IController;
+import org.github.jhy.chat.client.gui.AbstractController;
 import org.github.jhy.chat.client.netty.ApplicationContext;
 import org.github.jhy.chat.common.model.MessageUser;
 
@@ -16,7 +15,7 @@ import java.util.List;
  * @date 2023/1/11 16:17
  */
 @Slf4j
-public class MainController implements IController {
+public class MainController extends AbstractController {
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
@@ -24,15 +23,13 @@ public class MainController implements IController {
 
     private static final String VIEW_PATH = "/view/MainView.html";
 
-    private JSObject jsObject;
-
     // TODO
     public void handlerUserList() {
         List<MessageUser> users = ApplicationContext.getClient().getUserList("user");
         try {
             jsObject.call("showUserList", objectMapper.writeValueAsString(users));
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            log.error(e.getMessage(), e);
         }
     }
 
@@ -41,8 +38,9 @@ public class MainController implements IController {
         return contextApp.getResource(VIEW_PATH);
     }
 
-    public void info(String msg) {
-        log.info(msg);
+    @Override
+    public void initialize() {
+        handlerUserList();
     }
 
 }

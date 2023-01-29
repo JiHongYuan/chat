@@ -66,6 +66,9 @@ public class App extends Application {
 
                 controller.setWebEngine(engine);
                 controller.setJSObject(window);
+
+                // web engine 初始化
+                controller.initialize();
             }
         });
         if (log.isDebugEnabled()) {
