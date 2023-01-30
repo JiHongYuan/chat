@@ -39,6 +39,16 @@ public abstract class AbstractController implements IController {
     public void initialize() {
     }
 
+    @Override
+    public int getHeight() {
+        return 0;
+    }
+
+    @Override
+    public int getWidth() {
+        return 0;
+    }
+
     public final void info(String msg) {
         log.info(msg);
     }

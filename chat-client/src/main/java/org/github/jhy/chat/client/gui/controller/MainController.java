@@ -43,4 +43,14 @@ public class MainController extends AbstractController {
         handlerUserList();
     }
 
+    @Override
+    public int getWidth() {
+        return 1080;
+    }
+
+    @Override
+    public int getHeight() {
+        return 720;
+    }
+
 }

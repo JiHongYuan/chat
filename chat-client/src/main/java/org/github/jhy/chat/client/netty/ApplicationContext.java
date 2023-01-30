@@ -46,8 +46,17 @@ public class ApplicationContext {
         return client;
     }
 
-    public static void setClient(NettyChatClient client) {
-        ApplicationContext.client = client;
+    public static synchronized NettyChatClient initClient() {
+        if (client == null) {
+            client = new NettyChatClient("127.0.0.1", 9999);
+            try {
+                client.run();
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+                throw new RuntimeException(e);
+            }
+        }
+        return client;
     }
 
 }

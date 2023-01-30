@@ -24,22 +24,32 @@ public class LoginViewController extends AbstractController {
     /**
      * 处理登录 到主界面的事件
      */
-    public void handlerLogin(String username, String password) throws InterruptedException {
+    public void handlerLogin(String username, String password){
+
         // 跳转页面
-        NettyChatClient client = new NettyChatClient("127.0.0.1", 9999);
-        client.run();
+        NettyChatClient client = ApplicationContext.initClient();
 
         EventMessage eventMessage = client.sendRegister(new MessageUser(username, password));
-        System.out.println(eventMessage);
+        // TODO 处理登录返回逻辑
 
-        ApplicationContext.setClient(client);
-        ApplicationContext.getApp().showMainView();
+        // 登录成功, 跳转页面
+        ApplicationContext.getApp().go(MainController.class);
     }
 
 
     @Override
     public URL getResource(Class<?> contextApp) {
         return contextApp.getResource(VIEW_PATH);
+    }
+
+    @Override
+    public int getWidth() {
+        return 640;
+    }
+
+    @Override
+    public int getHeight() {
+        return 480;
     }
 
 }

@@ -34,7 +34,7 @@ public class NettyChatClientHandler extends SimpleChannelInboundHandler<EventMes
         }
         if (EventType.MESSAGE == eventType) {
             Message message = mapper.readValue(msg.getBody().toString(), Message.class);
-            log.info("来自{}的消息: {}", msg.getTo(), message.getMsg());
+            log.info("来自{}的消息: {}", msg.getFrom(), message.getMsg());
 
         } else {
             LoadingCache<String, SyncFuture<EventMessage>> futureCache = ApplicationContext.futureCache;

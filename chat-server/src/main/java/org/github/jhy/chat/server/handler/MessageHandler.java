@@ -16,7 +16,6 @@ import org.github.jhy.chat.server.support.ChatUserRegister;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * @author jihongyuan
@@ -79,23 +78,23 @@ public class MessageHandler {
         @Override
         public void handlerRequest(ChannelHandlerContext ctx, EventMessage msg, EventMessage retMsg) {
             UserSession userSession;
-            if ((userSession = chatUserRegister.get(msg.getTo())) != null) {
+            if ((userSession = chatUserRegister.get(msg.getFrom())) != null) {
                 userSession.setStatus(UserStatus.OFFLINE);
             } else {
                 userSession = new UserSession();
                 userSession.setSessionId(ctx.channel().id().asShortText());
-                userSession.setUsername(msg.getTo());
+                userSession.setUsername(msg.getFrom());
                 userSession.setStatus(UserStatus.OFFLINE);
             }
             retMsg.setBody(new Message("0", "登录成功"));
-            chatUserRegister.register(msg.getTo(), userSession);
+            chatUserRegister.register(msg.getFrom(), userSession);
         }
 
         @Override
         public EventMessage getEventMessage(EventMessage msg) {
             EventMessage retMsg = EventMessage.builderEventType(msg.getMsgId(), msg.getEventType());
-            retMsg.setTo("SERVER");
-            retMsg.setFrom(msg.getTo());
+            retMsg.setFrom("SERVER");
+            retMsg.setTo(msg.getFrom());
             return retMsg;
         }
     }
@@ -111,19 +110,21 @@ public class MessageHandler {
 
         @Override
         public EventMessage getEventMessage(EventMessage msg) {
-            EventMessage retMsg = EventMessage.builderEventType(msg.getMsgId(),  msg.getEventType());
-            retMsg.setTo("SERVER");
-            retMsg.setFrom(msg.getTo());
+            EventMessage retMsg = EventMessage.builderEventType(msg.getMsgId(), msg.getEventType());
+            retMsg.setFrom("SERVER");
+            retMsg.setTo(msg.getFrom());
 
             List<MessageUser> userList;
             Collection<UserSession> users = chatUserRegister.getUsers();
             if (userStatus == null) {
-                userList = users.stream().map(k -> new MessageUser(k.getUsername(), k.getStatus())).collect(Collectors.toList());
+                userList = users.stream()
+                        .filter(k -> k.getUsername().equals(msg.getFrom()))
+                        .map(k -> new MessageUser(k.getUsername(), k.getStatus())).toList();
             } else {
                 userList = users.stream()
-                        .filter(k -> userStatus == k.getStatus())
+                        .filter(k -> userStatus == k.getStatus() || k.getUsername().equals(msg.getFrom()))
                         .map(k -> new MessageUser(k.getUsername(), k.getStatus()))
-                        .collect(Collectors.toList());
+                        .toList();
             }
             retMsg.setBody(userList);
             return retMsg;

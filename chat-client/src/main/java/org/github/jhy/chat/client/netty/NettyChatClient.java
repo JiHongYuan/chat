@@ -1,6 +1,5 @@
 package org.github.jhy.chat.client.netty;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
@@ -75,8 +74,8 @@ public class NettyChatClient {
      */
     public EventMessage sendRegister(MessageUser messageUser) {
         EventMessage eventMessage = EventMessage.builderEventType(EventType.REGISTER);
-        eventMessage.setTo(messageUser.getUsername());
-        eventMessage.setFrom("SERVER");
+        eventMessage.setFrom(messageUser.getUsername());
+        eventMessage.setTo("SERVER");
         eventMessage.setBody(messageUser);
         try {
             return sendSync(eventMessage);
@@ -94,8 +93,8 @@ public class NettyChatClient {
      */
     public List<MessageUser> getUserList(String username) {
         EventMessage eventMessage = EventMessage.builderEventType(EventType.GET_USER);
-        eventMessage.setTo(username);
-        eventMessage.setFrom("SERVER");
+        eventMessage.setFrom(username);
+        eventMessage.setTo("SERVER");
         try {
             EventMessage message = sendSync(eventMessage);
             return (List<MessageUser>) message.getBody();

@@ -39,4 +39,8 @@ public interface IController {
      */
     void initialize();
 
+    int getWidth();
+
+    int getHeight();
+
 }

@@ -24,10 +24,10 @@ public class EventMessage {
     private String msgId;
 
     /** 发送者 */
-    private String to;
+    private String from;
 
     /** 接收者 */
-    private String from;
+    private String to;
 
     /** 事件 */
     private EventType eventType;
