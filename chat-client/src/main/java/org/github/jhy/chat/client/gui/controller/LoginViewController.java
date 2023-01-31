@@ -29,9 +29,11 @@ public class LoginViewController extends AbstractController {
         // 跳转页面
         NettyChatClient client = ApplicationContext.initClient();
 
+        MessageUser user = new MessageUser(username, password);
         EventMessage eventMessage = client.sendRegister(new MessageUser(username, password));
         // TODO 处理登录返回逻辑
 
+        ApplicationContext.setUser(user);
         // 登录成功, 跳转页面
         ApplicationContext.getApp().go(MainController.class);
     }

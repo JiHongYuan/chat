@@ -51,26 +51,43 @@ public class MessageHandler {
 
         switch (eventType) {
             case REGISTER -> new RegisterHandler().handle(ctx, msg);
+            case MESSAGE -> new MsgHandler().handle(ctx, msg);
             case GET_ON_LINE_USER -> new GetUserHandler(UserStatus.OFFLINE).handle(ctx, msg);
             case GET_USER -> new GetUserHandler().handle(ctx, msg);
         }
     }
 
     interface IEventHandler {
+
+        /**
+         * 事件处理
+         *
+         * @param ctx ctx
+         * @param msg event message
+         */
         default void handle(ChannelHandlerContext ctx, EventMessage msg) {
             EventMessage retMsg = getEventMessage(msg);
             handlerRequest(ctx, msg, retMsg);
             handlerResult(ctx, msg, retMsg);
         }
 
+        /**
+         * 处理请求
+         */
         default void handlerRequest(ChannelHandlerContext ctx, EventMessage msg, EventMessage retMsg) {
         }
 
-        default void handlerResult(ChannelHandlerContext ctx, EventMessage msg, EventMessage retMsg){
+        /**
+         * 处理返回
+         */
+        default void handlerResult(ChannelHandlerContext ctx, EventMessage msg, EventMessage retMsg) {
             ctx.channel().writeAndFlush(retMsg);
         }
 
-        EventMessage getEventMessage(EventMessage msg);
+        default EventMessage getEventMessage(EventMessage msg){
+            return null;
+        }
+
     }
 
     private static class RegisterHandler implements IEventHandler {
@@ -118,17 +135,31 @@ public class MessageHandler {
             Collection<UserSession> users = chatUserRegister.getUsers();
             if (userStatus == null) {
                 userList = users.stream()
-                        .filter(k -> k.getUsername().equals(msg.getFrom()))
+                        .filter(k -> !k.getUsername().equals(msg.getFrom()))
                         .map(k -> new MessageUser(k.getUsername(), k.getStatus())).toList();
             } else {
                 userList = users.stream()
-                        .filter(k -> userStatus == k.getStatus() || k.getUsername().equals(msg.getFrom()))
+                        .filter(k -> userStatus == k.getStatus() || !k.getUsername().equals(msg.getFrom()))
                         .map(k -> new MessageUser(k.getUsername(), k.getStatus()))
                         .toList();
             }
             retMsg.setBody(userList);
             return retMsg;
         }
+    }
+
+    @AllArgsConstructor
+    private static class MsgHandler implements IEventHandler {
+
+        @Override
+        public void handlerResult(ChannelHandlerContext ctx, EventMessage msg, EventMessage retMsg) {
+            UserSession userSession;
+            if ((userSession = chatUserRegister.get(msg.getTo())) != null) {
+                Channel channel = channelClientRegister.get(userSession.getSessionId());
+                channel.writeAndFlush(msg);
+            }
+        }
+
     }
 
 }

@@ -3,8 +3,10 @@ package org.github.jhy.chat.client.gui.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.github.jhy.chat.client.App;
 import org.github.jhy.chat.client.gui.AbstractController;
 import org.github.jhy.chat.client.netty.ApplicationContext;
+import org.github.jhy.chat.common.EventMessage;
 import org.github.jhy.chat.common.model.MessageUser;
 
 import java.net.URL;
@@ -23,12 +25,40 @@ public class MainController extends AbstractController {
 
     private static final String VIEW_PATH = "/view/MainView.html";
 
-    // TODO
+    private static Thread messageRefreshThread;
+
+    /**
+     * 处理用户列表
+     */
     public void handlerUserList() {
-        List<MessageUser> users = ApplicationContext.getClient().getUserList("user");
+        final MessageUser user = ApplicationContext.getUser();
+        List<MessageUser> users = ApplicationContext.getClient().getUserList(user.getUsername());
         try {
             jsObject.call("showUserList", objectMapper.writeValueAsString(users));
         } catch (JsonProcessingException e) {
+            log.error(e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 处理消息刷新
+     */
+    public void handlerMessageRefresh(EventMessage eventMessage) {
+        try {
+            jsObject.call("refreshMessage", objectMapper.writeValueAsString(eventMessage));
+        } catch (JsonProcessingException e) {
+            log.error(e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 处理消息发送
+     * */
+    public void handlerSend(String to, String msg) {
+        final MessageUser user = ApplicationContext.getUser();
+        try {
+            EventMessage eventMessage = ApplicationContext.getClient().sendMsg(user.getUsername(), to, msg);
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
     }
@@ -41,7 +71,24 @@ public class MainController extends AbstractController {
     @Override
     public void initialize() {
         handlerUserList();
+        synchronized (MainController.class) {
+            if (messageRefreshThread != null) {
+                messageRefreshThread.interrupt();
+            }
+            messageRefreshThread = new Thread(() -> {
+                while (!Thread.interrupted()) {
+                    try {
+                        EventMessage eventMessage = ApplicationContext.messageQueue.take();
+                        App.refreshUI(() -> handlerMessageRefresh(eventMessage));
+                    } catch (Exception e) {
+                        log.error(e.getMessage(), e);
+                    }
+                }
+            });
+            messageRefreshThread.start();
+        }
     }
+
 
     @Override
     public int getWidth() {

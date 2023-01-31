@@ -12,6 +12,8 @@ import org.github.jhy.chat.common.EventType;
 import org.github.jhy.chat.common.model.Message;
 import org.github.jhy.chat.common.model.MessageUser;
 
+import java.util.concurrent.LinkedBlockingQueue;
+
 
 /**
  * 聊天室处理类
@@ -28,13 +30,17 @@ public class NettyChatClientHandler extends SimpleChannelInboundHandler<EventMes
         if (msg.getBody() != null) {
             msg.setBody(switch (eventType) {
                 case REGISTER -> null;
-                case MESSAGE -> null;
+                case MESSAGE -> mapper.readValue(msg.getBody().toString(), Message.class);
                 case GET_ON_LINE_USER, GET_USER -> mapper.readerForListOf(MessageUser.class).readValue(msg.getBody().toString());
             });
         }
+
         if (EventType.MESSAGE == eventType) {
-            Message message = mapper.readValue(msg.getBody().toString(), Message.class);
+            Message message = (Message) msg.getBody();
             log.info("来自{}的消息: {}", msg.getFrom(), message.getMsg());
+
+            LinkedBlockingQueue<EventMessage> messageQueue = ApplicationContext.messageQueue;
+            messageQueue.add(msg);
 
         } else {
             LoadingCache<String, SyncFuture<EventMessage>> futureCache = ApplicationContext.futureCache;

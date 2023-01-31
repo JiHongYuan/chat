@@ -1,12 +1,15 @@
 package org.github.jhy.chat.client.netty;
 
 import com.google.common.cache.*;
-import io.netty.util.concurrent.Promise;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.github.jhy.chat.client.App;
 import org.github.jhy.chat.common.EventMessage;
+import org.github.jhy.chat.common.model.MessageUser;
 
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -16,9 +19,16 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class ApplicationContext {
 
+    @Getter
+    @Setter
     private static App app;
 
+    @Getter
     private static NettyChatClient client;
+
+    @Getter
+    @Setter
+    private static MessageUser user;
 
     public static LoadingCache<String, SyncFuture<EventMessage>> futureCache = CacheBuilder.newBuilder()
             .initialCapacity(100)
@@ -33,18 +43,7 @@ public class ApplicationContext {
                 }
             });
 
-
-    public static App getApp() {
-        return app;
-    }
-
-    public static void setApp(App app) {
-        ApplicationContext.app = app;
-    }
-
-    public static NettyChatClient getClient() {
-        return client;
-    }
+    public static LinkedBlockingQueue<EventMessage> messageQueue = new LinkedBlockingQueue<>();
 
     public static synchronized NettyChatClient initClient() {
         if (client == null) {
