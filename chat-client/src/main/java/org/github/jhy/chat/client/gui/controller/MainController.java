@@ -58,6 +58,7 @@ public class MainController extends AbstractController {
         final MessageUser user = ApplicationContext.getUser();
         try {
             EventMessage eventMessage = ApplicationContext.getClient().sendMsg(user.getUsername(), to, msg);
+            jsObject.call("refreshMyMessage", objectMapper.writeValueAsString(eventMessage));
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }

@@ -36,6 +36,16 @@
         $("#talk-text").append(strHtml);
     }
 
+    function refreshMyMessage(message){
+        message = JSON.parse(message);
+        let strHtml =
+            "<div class=\"alert alert-success card-body\" role=\"alert\">" +
+                "<div>" + message.to + "  " + message.msgId + "</div>" +
+                "<div>" + message.body.msg + "</div>" +
+            "</div>";
+        $("#talk-text").append(strHtml);
+    }
+
     // event
 
     // 用户列表移入
