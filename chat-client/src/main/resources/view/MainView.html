@@ -7,7 +7,16 @@
     <script src="https://code.jquery.com/jquery-3.6.3.js" integrity="sha256-nQLuAZGRRcILA+6dMBOvcRh5Pe310sBpanc6+QBmyVM=" crossorigin="anonymous"></script>
 </head>
 <script>
+    let currUser = {
+        name: null,
+    }
+
     let selected = null;
+
+    function initialize(user){
+        user = JSON.parse(user);
+        currUser.name = user.username;
+    }
 
     function showUserList(users) {
         users = JSON.parse(users);
@@ -28,22 +37,30 @@
 
     function refreshMessage(message) {
         message = JSON.parse(message);
-        let strHtml =
-            "<div class=\"alert alert-primary card-body\" role=\"alert\">" +
-                "<div>" + message.from + "  " + message.msgId + "</div>" +
-                "<div>" + message.body.msg + "</div>" +
-            "</div>";
+
+        app.info("from： " + message.from);
+        app.info("currUser： " + currUser.name);
+
+        let strHtml;
+        if(message.from === currUser.name){
+            strHtml =
+                "<div class=\"alert alert-success card-body\" role=\"alert\">" +
+                    "<div>" + message.from + "  " + message.msgId + "</div>" +
+                    "<div>" + message.body.msg + "</div>" +
+                "</div>";
+        }else{
+            strHtml =
+                "<div class=\"alert alert-primary card-body\" role=\"alert\">" +
+                    "<div>" + message.from + "  " + message.msgId + "</div>" +
+                    "<div>" + message.body.msg + "</div>" +
+                "</div>";
+        }
         $("#talk-text").append(strHtml);
     }
 
-    function refreshMyMessage(message){
-        message = JSON.parse(message);
-        let strHtml =
-            "<div class=\"alert alert-success card-body\" role=\"alert\">" +
-                "<div>" + message.to + "  " + message.msgId + "</div>" +
-                "<div>" + message.body.msg + "</div>" +
-            "</div>";
-        $("#talk-text").append(strHtml);
+    // 获取选中用户名称
+    function getSelectedName(){
+        return $("#" + selected).children().eq(0).text();
     }
 
     // event
@@ -72,6 +89,7 @@
             $(".user").css("border", "none");
             $(this).css("border", "1px solid #000");
         }
+        $("#talk-text").html("");
     })
 
     // 发送
@@ -86,16 +104,16 @@
 <div class="container">
     <div class="row">
         <div class="col-md-3">
-            <div class="card">
-                <div class="card-header bg-primary mb-3 text-white">
-                    当前登录用户
-                </div>
-                <div class="card-body">
-                    <div class="list-group">
-                        <p class="list-group-item card-text" id="login-title">你好，</p>
-                    </div>
-                </div>
-            </div>
+<!--            <div class="card">-->
+<!--                <div class="card-header bg-primary mb-3 text-white">-->
+<!--                    当前登录用户-->
+<!--                </div>-->
+<!--                <div class="card-body">-->
+<!--                    <div class="list-group">-->
+<!--                        <p class="list-group-item card-text" id="login-title">你好，</p>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
 
             <div class="card" id="online">
                 <div class="card-header bg-success text-white">当前其他用户</div>
@@ -104,13 +122,13 @@
                 </div>
             </div>
 
-            <div class="card">
-                <div class="card-header">群发系统广播</div>
-                <div class="card-body">
-                    <input type="text" class="form-control" id="msg"/><br>
-                    <button id="broadcast" type="button" class="btn btn-primary">发送</button>
-                </div>
-            </div>
+<!--            <div class="card">-->
+<!--                <div class="card-header">群发系统广播</div>-->
+<!--                <div class="card-body">-->
+<!--                    <input type="text" class="form-control" id="msg"/><br>-->
+<!--                    <button id="broadcast" type="button" class="btn btn-primary">发送</button>-->
+<!--                </div>-->
+<!--            </div>-->
 
         </div>
 

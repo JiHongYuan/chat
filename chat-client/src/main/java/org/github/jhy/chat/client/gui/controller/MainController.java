@@ -10,7 +10,7 @@ import org.github.jhy.chat.common.EventMessage;
 import org.github.jhy.chat.common.model.MessageUser;
 
 import java.net.URL;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author jihongyuan
@@ -27,6 +27,8 @@ public class MainController extends AbstractController {
 
     private static Thread messageRefreshThread;
 
+    private final Map<String, List<EventMessage>> userMessageMap = new HashMap<>();
+
     /**
      * 处理用户列表
      */
@@ -41,27 +43,57 @@ public class MainController extends AbstractController {
     }
 
     /**
-     * 处理消息刷新
+     * 处理消息发送
      */
-    public void handlerMessageRefresh(EventMessage eventMessage) {
+    public void handlerSend(String to, String msg) {
+        final MessageUser user = ApplicationContext.getUser();
         try {
-            jsObject.call("refreshMessage", objectMapper.writeValueAsString(eventMessage));
-        } catch (JsonProcessingException e) {
+            EventMessage eventMessage = ApplicationContext.getClient().sendMsg(user.getUsername(), to, msg);
+            refreshMessage(eventMessage.getTo(), eventMessage);
+            List<EventMessage> messages = userMessageMap.computeIfAbsent(eventMessage.getTo(), k -> new ArrayList<>());
+            messages.add(eventMessage);
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
     }
 
     /**
-     * 处理消息发送
-     * */
-    public void handlerSend(String to, String msg) {
-        final MessageUser user = ApplicationContext.getUser();
+     * 提供UI刷新方法
+     */
+    public void refreshMessage(String to) {
+        refreshMessage(to, null);
+    }
+
+    private void refreshMessage(String to, EventMessage eventMessage) {
+        String selectedTo = getTo();
         try {
-            EventMessage eventMessage = ApplicationContext.getClient().sendMsg(user.getUsername(), to, msg);
-            jsObject.call("refreshMyMessage", objectMapper.writeValueAsString(eventMessage));
+            // 增量刷新
+            if (to.equals(selectedTo)) {
+                jsObject.call("refreshMessage", objectMapper.writeValueAsString(eventMessage));
+            }
+            // TODO 全量刷新
+            // else if (eventMessage == null) {
+            //    jsObject.call("refreshMessage", objectMapper.writeValueAsString(userMessageMap.get(to)));
+            // }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    /**
+     * 执行消息刷新
+     */
+    private void invokeMessageRefresh(EventMessage eventMessage) {
+        refreshMessage(eventMessage.getFrom(), eventMessage);
+        List<EventMessage> messages = userMessageMap.computeIfAbsent(eventMessage.getFrom(), k -> new ArrayList<>());
+        messages.add(eventMessage);
+    }
+
+    /**
+     * 获取当前聊天目标
+     */
+    private String getTo() {
+        return (String) jsObject.call("getSelectedName");
     }
 
     @Override
@@ -71,22 +103,21 @@ public class MainController extends AbstractController {
 
     @Override
     public void initialize() {
-        handlerUserList();
+        initializeGUI();
         synchronized (MainController.class) {
-            if (messageRefreshThread != null) {
-                messageRefreshThread.interrupt();
-            }
-            messageRefreshThread = new Thread(() -> {
-                while (!Thread.interrupted()) {
-                    try {
-                        EventMessage eventMessage = ApplicationContext.messageQueue.take();
-                        App.refreshUI(() -> handlerMessageRefresh(eventMessage));
-                    } catch (Exception e) {
-                        log.error(e.getMessage(), e);
+            if (messageRefreshThread == null) {
+                messageRefreshThread = new Thread(() -> {
+                    while (!Thread.interrupted()) {
+                        try {
+                            EventMessage eventMessage = ApplicationContext.messageQueue.take();
+                            App.refreshUI(() -> invokeMessageRefresh(eventMessage));
+                        } catch (Exception e) {
+                            log.error(e.getMessage(), e);
+                        }
                     }
-                }
-            });
-            messageRefreshThread.start();
+                });
+                messageRefreshThread.start();
+            }
         }
     }
 
@@ -99,6 +130,15 @@ public class MainController extends AbstractController {
     @Override
     public int getHeight() {
         return 720;
+    }
+
+    private void initializeGUI() {
+        handlerUserList();
+        try {
+            jsObject.call("initialize", objectMapper.writeValueAsString(ApplicationContext.getUser()));
+        } catch (JsonProcessingException e) {
+            log.error(e.getMessage(), e);
+        }
     }
 
 }
