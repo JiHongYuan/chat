@@ -20,6 +20,9 @@ public class EventMessageCodec extends MessageToMessageCodec<ByteBuf, EventMessa
 
     @Override
     protected void encode(ChannelHandlerContext ctx, EventMessage msg, List<Object> out) throws Exception {
+        if (msg.getBody() != null) {
+            msg.setBody(mapper.writeValueAsString(msg.getBody()));
+        }
         String str = mapper.writeValueAsString(msg);
         out.add(Unpooled.copiedBuffer(str, CharsetUtil.UTF_8));
     }

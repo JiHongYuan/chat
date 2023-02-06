@@ -1,4 +1,4 @@
-package org.github.jhy.chat.server.handler;
+package org.github.jhy.chat.server.netty.handler;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;

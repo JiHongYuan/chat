@@ -1,4 +1,4 @@
-module org.github.jhy.chat.client {
+module client {
     requires jdk.jsobject;
 
     requires javafx.controls;

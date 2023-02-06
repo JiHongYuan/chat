@@ -1,7 +1,7 @@
-package org.github.jhy.chat.server.support;
+package org.github.jhy.chat.server.netty.support;
 
 import io.netty.channel.Channel;
-import org.github.jhy.chat.server.IRegister;
+import org.github.jhy.chat.server.netty.IRegister;
 
 import java.util.concurrent.ConcurrentHashMap;
 

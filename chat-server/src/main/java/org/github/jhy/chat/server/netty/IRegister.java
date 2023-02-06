@@ -1,4 +1,4 @@
-package org.github.jhy.chat.server;
+package org.github.jhy.chat.server.netty;
 
 /**
  * @author jihongyuan

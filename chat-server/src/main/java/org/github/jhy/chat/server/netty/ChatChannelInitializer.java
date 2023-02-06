@@ -1,11 +1,9 @@
-package org.github.jhy.chat.server;
+package org.github.jhy.chat.server.netty;
 
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.SocketChannel;
-import io.netty.handler.codec.string.StringDecoder;
-import io.netty.handler.codec.string.StringEncoder;
-import org.github.jhy.chat.server.handler.EventMessageCodec;
-import org.github.jhy.chat.server.handler.NettyChatServerHandler;
+import org.github.jhy.chat.server.netty.handler.EventMessageCodec;
+import org.github.jhy.chat.server.netty.handler.NettyChatServerHandler;
 
 
 /**

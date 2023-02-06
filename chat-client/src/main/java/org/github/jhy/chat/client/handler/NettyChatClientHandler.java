@@ -29,8 +29,7 @@ public class NettyChatClientHandler extends SimpleChannelInboundHandler<EventMes
 
         if (msg.getBody() != null) {
             msg.setBody(switch (eventType) {
-                case REGISTER -> null;
-                case MESSAGE -> mapper.readValue(msg.getBody().toString(), Message.class);
+                case MESSAGE, SIGN_IN, SIGN_UP -> mapper.readValue(msg.getBody().toString(), Message.class);
                 case GET_ON_LINE_USER, GET_USER -> mapper.readerForListOf(MessageUser.class).readValue(msg.getBody().toString());
             });
         }
@@ -41,10 +40,11 @@ public class NettyChatClientHandler extends SimpleChannelInboundHandler<EventMes
 
             LinkedBlockingQueue<EventMessage> messageQueue = ApplicationContext.messageQueue;
             messageQueue.add(msg);
+        }
 
-        } else {
-            LoadingCache<String, SyncFuture<EventMessage>> futureCache = ApplicationContext.futureCache;
-            SyncFuture<EventMessage> future = futureCache.get(msg.getMsgId());
+        LoadingCache<String, SyncFuture<EventMessage>> futureCache = ApplicationContext.futureCache;
+        SyncFuture<EventMessage> future = futureCache.get(msg.getMsgId());
+        if(future != null){
             future.setResponse(msg);
         }
 

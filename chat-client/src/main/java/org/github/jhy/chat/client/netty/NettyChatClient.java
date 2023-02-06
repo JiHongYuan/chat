@@ -60,27 +60,13 @@ public class NettyChatClient {
      * @param eventMessage msg
      * @return server response
      */
-    public EventMessage sendSync(EventMessage eventMessage) throws InterruptedException {
+    public EventMessage sendSync(EventMessage eventMessage){
         SyncFuture<EventMessage> syncFuture = new SyncFuture<>();
         ApplicationContext.futureCache.put(eventMessage.getMsgId(), syncFuture);
         send(eventMessage);
-        return syncFuture.get();
-    }
-
-    /**
-     * 发送注册消息
-     *
-     * @param messageUser user info
-     * @return msgId
-     */
-    public EventMessage sendRegister(MessageUser messageUser) {
-        EventMessage eventMessage = EventMessage.builderEventType(EventType.REGISTER);
-        eventMessage.setFrom(messageUser.getUsername());
-        eventMessage.setTo("SERVER");
-        eventMessage.setBody(messageUser);
         try {
-            return sendSync(eventMessage);
-        } catch (Exception e) {
+            return syncFuture.get();
+        } catch (InterruptedException e) {
             log.error(e.getMessage(), e);
             throw new RuntimeException(e);
         }

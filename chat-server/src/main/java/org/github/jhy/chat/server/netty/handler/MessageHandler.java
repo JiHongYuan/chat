@@ -1,18 +1,19 @@
-package org.github.jhy.chat.server.handler;
+package org.github.jhy.chat.server.netty.handler;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.chat.data.user.service.UserService;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.github.jhy.chat.common.Constants;
 import org.github.jhy.chat.common.EventMessage;
 import org.github.jhy.chat.common.EventType;
 import org.github.jhy.chat.common.model.Message;
 import org.github.jhy.chat.common.model.MessageUser;
 import org.github.jhy.chat.server.model.UserSession;
 import org.github.jhy.chat.common.model.UserStatus;
-import org.github.jhy.chat.server.support.ChannelClientRegister;
-import org.github.jhy.chat.server.support.ChatUserRegister;
+import org.github.jhy.chat.server.netty.support.ChannelClientRegister;
+import org.github.jhy.chat.server.netty.support.ChatUserRegister;
 
 import java.util.Collection;
 import java.util.List;
@@ -23,8 +24,6 @@ import java.util.List;
  */
 @Slf4j
 public class MessageHandler {
-
-    private static final ObjectMapper mapper = new ObjectMapper();
 
     private static final ChannelClientRegister channelClientRegister = new ChannelClientRegister();
     private static final ChatUserRegister chatUserRegister = new ChatUserRegister();
@@ -50,7 +49,8 @@ public class MessageHandler {
         final EventType eventType = msg.getEventType();
 
         switch (eventType) {
-            case REGISTER -> new RegisterHandler().handle(ctx, msg);
+            case SIGN_IN -> new SignInHandler().handle(ctx, msg);
+            case SIGN_UP -> new SignUpHandler().handle(ctx, msg);
             case MESSAGE -> new MsgHandler().handle(ctx, msg);
             case GET_ON_LINE_USER -> new GetUserHandler(UserStatus.OFFLINE).handle(ctx, msg);
             case GET_USER -> new GetUserHandler().handle(ctx, msg);
@@ -90,26 +90,66 @@ public class MessageHandler {
 
     }
 
-    private static class RegisterHandler implements IEventHandler {
+    private static class SignInHandler implements IEventHandler {
+
+        private final UserService userService = UserService.INSTANT;
 
         @Override
         public void handlerRequest(ChannelHandlerContext ctx, EventMessage msg, EventMessage retMsg) {
+            MessageUser body = (MessageUser) msg.getBody();
+
+            // 登录校验
+            try {
+                userService.login(body.getUsername(), body.getPassword());
+            } catch (Exception e) {
+                retMsg.setBody(new Message(Constants.SIGN_IN_NAME_OR_PASSWORD_ERROR));
+                return;
+            }
+
             UserSession userSession;
             if ((userSession = chatUserRegister.get(msg.getFrom())) != null) {
-                userSession.setStatus(UserStatus.OFFLINE);
+                userSession.setStatus(UserStatus.ONLINE);
             } else {
                 userSession = new UserSession();
                 userSession.setSessionId(ctx.channel().id().asShortText());
                 userSession.setUsername(msg.getFrom());
                 userSession.setStatus(UserStatus.OFFLINE);
             }
-            retMsg.setBody(new Message("0", "登录成功"));
+            retMsg.setBody(new Message(Constants.SUCCESS));
             chatUserRegister.register(msg.getFrom(), userSession);
         }
 
         @Override
         public EventMessage getEventMessage(EventMessage msg) {
             EventMessage retMsg = EventMessage.builderEventType(msg.getMsgId(), msg.getEventType());
+            retMsg.setFrom("SERVER");
+            retMsg.setTo(msg.getFrom());
+            return retMsg;
+        }
+    }
+
+    private static class SignUpHandler implements IEventHandler {
+
+        private final UserService userService = UserService.INSTANT;
+
+        @Override
+        public void handlerRequest(ChannelHandlerContext ctx, EventMessage msg, EventMessage retMsg) {
+            MessageUser body = (MessageUser) msg.getBody();
+
+            boolean existUsername = userService.existUsername(body.getUsername());
+            if(existUsername){
+                retMsg.setBody(new Message(Constants.SIGN_UP_NAME_EXISTS));
+                return;
+            }
+
+            userService.add(body.getUsername(), body.getPassword());
+            retMsg.setBody(new Message(Constants.SUCCESS));
+            userService.add(body.getUsername(), body.getPassword());
+        }
+
+        @Override
+        public EventMessage getEventMessage(EventMessage msg) {
+            EventMessage retMsg = EventMessage.builderEventType(msg.getMsgId(), EventType.MESSAGE);
             retMsg.setFrom("SERVER");
             retMsg.setTo(msg.getFrom());
             return retMsg;

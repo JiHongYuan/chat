@@ -1,4 +1,4 @@
-package org.github.jhy.chat.server.handler;
+package org.github.jhy.chat.server.netty.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.netty.buffer.ByteBuf;
@@ -8,6 +8,8 @@ import io.netty.handler.codec.MessageToMessageCodec;
 import io.netty.util.CharsetUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.github.jhy.chat.common.EventMessage;
+import org.github.jhy.chat.common.model.Message;
+import org.github.jhy.chat.common.model.MessageUser;
 
 import java.util.List;
 
@@ -42,6 +44,15 @@ public class EventMessageCodec extends MessageToMessageCodec<ByteBuf, EventMessa
         }
 
         EventMessage eventMessage = mapper.readValue(strMsg, EventMessage.class);
+
+        // 根据时间类型, 转换body对象类型
+        String body = (String) eventMessage.getBody();
+        eventMessage.setBody(switch (eventMessage.getEventType()) {
+            case SIGN_IN, SIGN_UP -> mapper.readValue(body, MessageUser.class);
+            case MESSAGE -> mapper.readValue(body, Message.class);
+            case GET_ON_LINE_USER, GET_USER -> body;
+        });
+
         out.add(eventMessage);
     }
 

@@ -19,6 +19,10 @@ public class Message {
 
     private Object data;
 
+    public Message(String code) {
+        this.code = code;
+    }
+
     public Message(String code, String msg) {
         this.code = code;
         this.msg = msg;

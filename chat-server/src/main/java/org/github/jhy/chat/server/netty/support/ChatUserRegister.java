@@ -1,6 +1,6 @@
-package org.github.jhy.chat.server.support;
+package org.github.jhy.chat.server.netty.support;
 
-import org.github.jhy.chat.server.IRegister;
+import org.github.jhy.chat.server.netty.IRegister;
 import org.github.jhy.chat.server.model.UserSession;
 
 import java.util.Collection;
