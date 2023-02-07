@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+    <script src="https://code.jquery.com/jquery-3.6.3.js" integrity="sha256-nQLuAZGRRcILA+6dMBOvcRh5Pe310sBpanc6+QBmyVM=" crossorigin="anonymous"></script>
 </head>
 <script>
 
     function handlerSignIn(){
         const username = document.getElementById('username').value;
         const password = document.getElementById('password').value;
-        app.handlerLogin(username, password)
+        app.handlerSignIn(username, password)
     }
 
     function handlerSignUp(){
@@ -18,8 +19,23 @@
         app.handlerSignUp(username, password)
     }
 
-    function fail(code){
-        app.info(code);
+    function fail(code) {
+
+        let msg = null;
+        if (code === "1000") {
+            msg = "注册错误"
+        } else if (code === "1001") {
+            msg = "注册用户名存在"
+        } else if (code === "2000") {
+            msg = "登录错误"
+        } else if (code === "2001") {
+            msg = "登录用户名密码错误"
+        }
+
+        app.info(msg)
+
+        $("#tips").css("visibility", "visible");
+        $("#tips").text(msg);
     }
 
 </script>
@@ -34,8 +50,13 @@
         密码：
         <input type="text" name="description" id="password">
     </div>
+    <div>
+        <span id="tips" style="color:#F00;visibility:hidden;"></span>
+    </div>
+
     <button onclick="handlerSignIn()">登录</button>
     <button onclick="handlerSignUp()">注册</button>
+
 </div>
 </body>
 

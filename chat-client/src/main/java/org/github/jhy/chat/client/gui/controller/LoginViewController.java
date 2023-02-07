@@ -27,41 +27,23 @@ public class LoginViewController extends AbstractController {
     /**
      * 处理登录 到主界面的事件
      */
-    public void handlerLogin(String username, String password) {
-
-        // 跳转页面
-        NettyChatClient client = ApplicationContext.initClient();
-
-        MessageUser user = new MessageUser(username, password);
-        EventMessage requestMsg = EventMessage.builderEventType(EventType.SIGN_IN);
-        requestMsg.setFrom(username);
-        requestMsg.setBody(new MessageUser(username, password));
-
-        EventMessage responseMsg = client.sendSync(requestMsg);
-
-        Message message = (Message) responseMsg.getBody();
-        // 登录成功, 跳转页面
-        if (Constants.SUCCESS.equals(message.getCode())) {
-            ApplicationContext.setUser(user);
-            ApplicationContext.getApp().go(MainController.class);
-        } else {
-            try {
-                jsObject.call("fail", message.getCode());
-            } catch (Exception e) {
-                log.error(e.getMessage(), e);
-            }
-        }
+    public void handlerSignIn(String username, String password) {
+        handlerSign(username, password, EventType.SIGN_IN);
     }
 
     /**
      * 处理注册 到主界面的事件
      */
     public void handlerSignUp(String username, String password) {
+        handlerSign(username, password, EventType.SIGN_UP);
+    }
+
+    public void handlerSign(String username, String password, EventType eventType) {
         // 跳转页面
         NettyChatClient client = ApplicationContext.initClient();
 
         MessageUser user = new MessageUser(username, password);
-        EventMessage requestMsg = EventMessage.builderEventType(EventType.SIGN_UP);
+        EventMessage requestMsg = EventMessage.builderEventType(eventType);
         requestMsg.setFrom(username);
         requestMsg.setBody(new MessageUser(username, password));
 
@@ -73,11 +55,7 @@ public class LoginViewController extends AbstractController {
             ApplicationContext.setUser(user);
             ApplicationContext.getApp().go(MainController.class);
         } else {
-            try {
-                jsObject.call("fail", message.getCode());
-            } catch (Exception e) {
-                log.error(e.getMessage(), e);
-            }
+            jsObject.call("fail", message.getCode());
         }
     }
 

@@ -102,6 +102,7 @@ public class MessageHandler {
             try {
                 userService.login(body.getUsername(), body.getPassword());
             } catch (Exception e) {
+                log.error(e.getMessage(), e);
                 retMsg.setBody(new Message(Constants.SIGN_IN_NAME_OR_PASSWORD_ERROR));
                 return;
             }

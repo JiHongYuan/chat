@@ -16,6 +16,7 @@
         where is_deleted = 0
         AND   username   = #{username}
         AND   password   = #{password}
+        LIMIT 1;
     </select>
 
     <insert id="insertUser">
