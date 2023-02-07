@@ -6,7 +6,6 @@ import javafx.stage.Stage;
 
 import lombok.extern.slf4j.Slf4j;
 import org.github.jhy.chat.client.gui.IController;
-import org.github.jhy.chat.client.netty.ApplicationContext;
 
 @Slf4j
 public class App extends Application {

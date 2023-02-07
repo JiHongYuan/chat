@@ -1,14 +1,14 @@
-package org.github.jhy.chat.client.netty;
+package org.github.jhy.chat.client;
 
 import com.google.common.cache.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.github.jhy.chat.client.App;
+import org.github.jhy.chat.client.netty.NettyChatClient;
+import org.github.jhy.chat.client.netty.SyncFuture;
 import org.github.jhy.chat.common.EventMessage;
 import org.github.jhy.chat.common.model.MessageUser;
 
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
@@ -30,12 +30,11 @@ public class ApplicationContext {
     @Setter
     private static MessageUser user;
 
-    public static LoadingCache<String, SyncFuture<EventMessage>> futureCache = CacheBuilder.newBuilder()
+    public static final LoadingCache<String, SyncFuture<EventMessage>> FUTURE_CACHE = CacheBuilder.newBuilder()
             .initialCapacity(100)
             .maximumSize(10000)
             .concurrencyLevel(20)
-            // expireAfterWrite设置写缓存后8秒钟过期
-            .expireAfterWrite(30, TimeUnit.SECONDS)
+            .expireAfterWrite(10, TimeUnit.SECONDS)
             .build(new CacheLoader<>() {
                 @Override
                 public SyncFuture<EventMessage> load(String key) throws Exception {
@@ -43,16 +42,19 @@ public class ApplicationContext {
                 }
             });
 
-    public static LinkedBlockingQueue<EventMessage> messageQueue = new LinkedBlockingQueue<>();
+    public static final LinkedBlockingQueue<EventMessage> MESSAGE_QUEUE = new LinkedBlockingQueue<>();
+
+    private ApplicationContext() {
+    }
 
     public static synchronized NettyChatClient initClient() {
         if (client == null) {
             client = new NettyChatClient("127.0.0.1", 9999);
             try {
                 client.run();
-            } catch (Exception e) {
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
                 log.error(e.getMessage(), e);
-                throw new RuntimeException(e);
             }
         }
         return client;

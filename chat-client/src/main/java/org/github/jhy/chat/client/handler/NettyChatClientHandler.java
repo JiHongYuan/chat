@@ -5,7 +5,7 @@ import com.google.common.cache.LoadingCache;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import lombok.extern.slf4j.Slf4j;
-import org.github.jhy.chat.client.netty.ApplicationContext;
+import org.github.jhy.chat.client.ApplicationContext;
 import org.github.jhy.chat.client.netty.SyncFuture;
 import org.github.jhy.chat.common.EventMessage;
 import org.github.jhy.chat.common.EventType;
@@ -38,11 +38,11 @@ public class NettyChatClientHandler extends SimpleChannelInboundHandler<EventMes
             Message message = (Message) msg.getBody();
             log.info("来自{}的消息: {}", msg.getFrom(), message.getMsg());
 
-            LinkedBlockingQueue<EventMessage> messageQueue = ApplicationContext.messageQueue;
+            LinkedBlockingQueue<EventMessage> messageQueue = ApplicationContext.MESSAGE_QUEUE;
             messageQueue.add(msg);
         }
 
-        LoadingCache<String, SyncFuture<EventMessage>> futureCache = ApplicationContext.futureCache;
+        LoadingCache<String, SyncFuture<EventMessage>> futureCache = ApplicationContext.FUTURE_CACHE;
         SyncFuture<EventMessage> future = futureCache.get(msg.getMsgId());
         if(future != null){
             future.setResponse(msg);

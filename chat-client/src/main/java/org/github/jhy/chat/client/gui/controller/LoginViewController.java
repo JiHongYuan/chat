@@ -3,7 +3,7 @@ package org.github.jhy.chat.client.gui.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.github.jhy.chat.client.gui.AbstractController;
-import org.github.jhy.chat.client.netty.ApplicationContext;
+import org.github.jhy.chat.client.ApplicationContext;
 import org.github.jhy.chat.client.netty.NettyChatClient;
 import org.github.jhy.chat.common.Constants;
 import org.github.jhy.chat.common.EventMessage;

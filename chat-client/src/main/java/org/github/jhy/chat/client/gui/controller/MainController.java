@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.github.jhy.chat.client.App;
 import org.github.jhy.chat.client.gui.AbstractController;
-import org.github.jhy.chat.client.netty.ApplicationContext;
+import org.github.jhy.chat.client.ApplicationContext;
 import org.github.jhy.chat.common.EventMessage;
 import org.github.jhy.chat.common.model.MessageUser;
 
@@ -109,7 +109,7 @@ public class MainController extends AbstractController {
                 messageRefreshThread = new Thread(() -> {
                     while (!Thread.interrupted()) {
                         try {
-                            EventMessage eventMessage = ApplicationContext.messageQueue.take();
+                            EventMessage eventMessage = ApplicationContext.MESSAGE_QUEUE.take();
                             App.refreshUI(() -> invokeMessageRefresh(eventMessage));
                         } catch (Exception e) {
                             log.error(e.getMessage(), e);

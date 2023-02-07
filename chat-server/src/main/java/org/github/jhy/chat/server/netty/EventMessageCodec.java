@@ -1,4 +1,4 @@
-package org.github.jhy.chat.server.netty.handler;
+package org.github.jhy.chat.server.netty;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.netty.buffer.ByteBuf;

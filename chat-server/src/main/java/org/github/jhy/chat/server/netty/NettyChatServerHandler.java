@@ -1,9 +1,10 @@
-package org.github.jhy.chat.server.netty.handler;
+package org.github.jhy.chat.server.netty;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.github.jhy.chat.common.EventMessage;
+import org.github.jhy.chat.server.netty.handler.MessageHandler;
 
 /**
  * 聊天室业务处理类

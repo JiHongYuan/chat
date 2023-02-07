@@ -14,6 +14,7 @@ public class UserServiceImpl implements UserService {
 
     private final UserMapper userMapper;
     private final SqlSession sqlSession;
+
     public UserServiceImpl() {
         this.sqlSession = MybatisContext.getSqlSession();
         this.userMapper = sqlSession.getMapper(UserMapper.class);

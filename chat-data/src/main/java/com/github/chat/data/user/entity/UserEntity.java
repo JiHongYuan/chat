@@ -5,6 +5,7 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 /**
+ * 用户
  * @author jihongyuan
  * @date 2023/2/6 11:13
  */

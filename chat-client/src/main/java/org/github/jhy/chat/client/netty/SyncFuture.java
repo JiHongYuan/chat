@@ -31,8 +31,10 @@ public class SyncFuture<T> implements Future<T> {
 
     @Override
     public T get() throws InterruptedException {
-        latch.await();
-        return this.response;
+        if (latch.await(15, TimeUnit.SECONDS)) {
+            return this.response;
+        }
+        return null;
     }
 
     @Override

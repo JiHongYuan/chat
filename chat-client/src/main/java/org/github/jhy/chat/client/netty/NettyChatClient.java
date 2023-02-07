@@ -1,12 +1,15 @@
 package org.github.jhy.chat.client.netty;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
+
+import java.util.Collections;
+
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.github.jhy.chat.client.ApplicationContext;
 import org.github.jhy.chat.common.EventMessage;
 import org.github.jhy.chat.common.EventType;
 import org.github.jhy.chat.common.model.Message;
@@ -19,8 +22,6 @@ import java.util.List;
  */
 @Slf4j
 public class NettyChatClient {
-
-    private static final ObjectMapper mapper = new ObjectMapper();
 
     private final String ip;
     private final int port;
@@ -60,16 +61,17 @@ public class NettyChatClient {
      * @param eventMessage msg
      * @return server response
      */
-    public EventMessage sendSync(EventMessage eventMessage){
+    public EventMessage sendSync(EventMessage eventMessage) {
         SyncFuture<EventMessage> syncFuture = new SyncFuture<>();
-        ApplicationContext.futureCache.put(eventMessage.getMsgId(), syncFuture);
+        ApplicationContext.FUTURE_CACHE.put(eventMessage.getMsgId(), syncFuture);
         send(eventMessage);
         try {
             return syncFuture.get();
         } catch (InterruptedException e) {
             log.error(e.getMessage(), e);
-            throw new RuntimeException(e);
+            Thread.currentThread().interrupt();
         }
+        return null;
     }
 
     /**
@@ -78,17 +80,19 @@ public class NettyChatClient {
      * @param from current user
      * @return msgId
      */
+    @SuppressWarnings("unchecked")
     public List<MessageUser> getUserList(String from) {
         EventMessage eventMessage = EventMessage.builderEventType(EventType.GET_USER);
         eventMessage.setFrom(from);
         eventMessage.setTo("SERVER");
+
         try {
             EventMessage message = sendSync(eventMessage);
             return (List<MessageUser>) message.getBody();
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            throw new RuntimeException(e);
         }
+        return Collections.emptyList();
     }
 
     public EventMessage sendMsg(String from, String to, String msg) {
@@ -100,7 +104,6 @@ public class NettyChatClient {
             send(eventMessage);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            throw new RuntimeException(e);
         }
         return eventMessage;
     }

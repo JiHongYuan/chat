@@ -2,8 +2,6 @@ package org.github.jhy.chat.server.netty;
 
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.SocketChannel;
-import org.github.jhy.chat.server.netty.handler.EventMessageCodec;
-import org.github.jhy.chat.server.netty.handler.NettyChatServerHandler;
 
 
 /**
@@ -13,7 +11,7 @@ import org.github.jhy.chat.server.netty.handler.NettyChatServerHandler;
 public class ChatChannelInitializer extends ChannelInitializer<SocketChannel> {
 
     @Override
-    protected void initChannel(SocketChannel ch) throws Exception {
+    protected void initChannel(SocketChannel ch) {
         ch.pipeline().addLast(new EventMessageCodec());
         ch.pipeline().addLast(new NettyChatServerHandler());
     }
