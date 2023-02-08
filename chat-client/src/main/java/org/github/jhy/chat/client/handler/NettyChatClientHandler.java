@@ -1,6 +1,7 @@
 package org.github.jhy.chat.client.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -43,9 +44,10 @@ public class NettyChatClientHandler extends SimpleChannelInboundHandler<EventMes
         }
 
         LoadingCache<String, SyncFuture<EventMessage>> futureCache = ApplicationContext.FUTURE_CACHE;
-        SyncFuture<EventMessage> future = futureCache.get(msg.getMsgId());
-        if(future != null){
+        try {
+            SyncFuture<EventMessage> future = futureCache.get(msg.getMsgId());
             future.setResponse(msg);
+        } catch (CacheLoader.InvalidCacheLoadException ignored) {
         }
 
         if (log.isDebugEnabled()) {

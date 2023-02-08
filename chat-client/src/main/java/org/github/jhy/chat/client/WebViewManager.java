@@ -75,13 +75,9 @@ public class WebViewManager {
                 controller.initialize();
             }
         });
-        if (log.isDebugEnabled()) {
-            engine.getLoadWorker().stateProperty().addListener((obs, oldValue, newState) -> {
-                if (newState == Worker.State.SUCCEEDED) {
-                    engine.executeScript("var firebug=document.createElement('script');firebug.setAttribute('src','https://lupatec.eu/getfirebug/firebug-lite-compressed.js');document.body.appendChild(firebug);(function(){if(window.firebug.version){firebug.init();}else{setTimeout(arguments.callee);}})();void(firebug);");
-                }
-            });
-        }
+
+        engine.setOnAlert(event -> log.info(event.getData()));
+        engine.setOnError(event -> log.error(event.getMessage(), event.getException()));
     }
 
 }

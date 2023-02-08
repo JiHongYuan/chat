@@ -20,8 +20,6 @@ import java.net.URL;
 @Slf4j
 public class LoginViewController extends AbstractController {
 
-    public static final String TITLE = "登录";
-
     private static final String VIEW_PATH = "/view/LoginView.html";
 
     /**

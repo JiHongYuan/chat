@@ -1,16 +1,18 @@
 package org.github.jhy.chat.client.gui.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.github.jhy.chat.client.App;
 import org.github.jhy.chat.client.gui.AbstractController;
 import org.github.jhy.chat.client.ApplicationContext;
 import org.github.jhy.chat.common.EventMessage;
+import org.github.jhy.chat.common.JSON;
 import org.github.jhy.chat.common.model.MessageUser;
 
 import java.net.URL;
 import java.util.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author jihongyuan
@@ -19,26 +21,24 @@ import java.util.*;
 @Slf4j
 public class MainController extends AbstractController {
 
-    private ObjectMapper objectMapper = new ObjectMapper();
-
-    public static final String TITLE = "主页";
-
     private static final String VIEW_PATH = "/view/MainView.html";
 
-    private static Thread messageRefreshThread;
+    private boolean initialized = false;
+
+    private final ScheduledExecutorService service = Executors.newScheduledThreadPool(2);
 
     private final Map<String, List<EventMessage>> userMessageMap = new HashMap<>();
 
     /**
      * 处理用户列表
      */
-    public void handlerUserList() {
-        final MessageUser user = ApplicationContext.getUser();
-        List<MessageUser> users = ApplicationContext.getClient().getUserList(user.getUsername());
+    public void refreshUserList() {
         try {
-            jsObject.call("showUserList", objectMapper.writeValueAsString(users));
-        } catch (JsonProcessingException e) {
-            log.error(e.getMessage(), e);
+            final MessageUser user = ApplicationContext.getUser();
+            List<MessageUser> users = ApplicationContext.getClient().getUserList(user.getUsername());
+            App.refreshUI(() -> jsObject.call("showUserList", JSON.toString(users)));
+        } catch (Exception e) {
+            log.error("Refresh main user list error", e);
         }
     }
 
@@ -69,7 +69,7 @@ public class MainController extends AbstractController {
         try {
             // 增量刷新
             if (to.equals(selectedTo)) {
-                jsObject.call("refreshMessage", objectMapper.writeValueAsString(eventMessage));
+                App.refreshUI(() -> jsObject.call("refreshMessage", JSON.toString(eventMessage)));
             }
             // TODO 全量刷新
             // else if (eventMessage == null) {
@@ -104,21 +104,23 @@ public class MainController extends AbstractController {
     @Override
     public void initialize() {
         initializeGUI();
-        synchronized (MainController.class) {
-            if (messageRefreshThread == null) {
-                messageRefreshThread = new Thread(() -> {
-                    while (!Thread.interrupted()) {
-                        try {
-                            EventMessage eventMessage = ApplicationContext.MESSAGE_QUEUE.take();
-                            App.refreshUI(() -> invokeMessageRefresh(eventMessage));
-                        } catch (Exception e) {
-                            log.error(e.getMessage(), e);
-                        }
-                    }
-                });
-                messageRefreshThread.start();
+
+        if (initialized) return;
+        service.submit(() -> {
+            while (!Thread.interrupted()) {
+                try {
+                    EventMessage eventMessage = ApplicationContext.MESSAGE_QUEUE.take();
+                    App.refreshUI(() -> invokeMessageRefresh(eventMessage));
+                } catch (InterruptedException e) {
+                    log.error(e.getMessage(), e);
+                    Thread.currentThread().interrupt();
+                }
             }
-        }
+        });
+        // TODO 刷新用户会把页面选中刷新
+        service.scheduleAtFixedRate(this::refreshUserList, 0, 180, TimeUnit.SECONDS);
+
+        initialized = true;
     }
 
 
@@ -133,12 +135,8 @@ public class MainController extends AbstractController {
     }
 
     private void initializeGUI() {
-        handlerUserList();
-        try {
-            jsObject.call("initialize", objectMapper.writeValueAsString(ApplicationContext.getUser()));
-        } catch (JsonProcessingException e) {
-            log.error(e.getMessage(), e);
-        }
+        refreshUserList();
+        jsObject.call("initialize", JSON.toString(ApplicationContext.getUser()));
     }
 
 }
