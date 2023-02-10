@@ -35,12 +35,16 @@
         element.innerHTML = strHtml;
     }
 
+    function refreshMessageList(messageList) {
+        $("#talk-text").html("");
+        messageList = eval(messageList);
+        for (let i = 0; i < messageList.length; i++) {
+            refreshMessage(JSON.stringify(messageList[i]));
+        }
+    }
+
     function refreshMessage(message) {
         message = JSON.parse(message);
-
-        app.info("from： " + message.from);
-        app.info("currUser： " + currUser.name);
-
         let strHtml;
         if(message.from === currUser.name){
             strHtml =
@@ -88,6 +92,8 @@
             selected = id;
             $(".user").css("border", "none");
             $(this).css("border", "1px solid #000");
+
+            app.refreshMessage("-1");
         }
         $("#talk-text").html("");
     })

@@ -29,8 +29,6 @@ public class MessageHandler {
     private static final ChatUserRegister chatUserRegister = new ChatUserRegister();
 
     public void handlerActive(ChannelHandlerContext ctx) {
-        Channel channel = ctx.channel();
-        channelClientRegister.register(channel.id().asShortText(), channel);
     }
 
     public void handlerInactive(ChannelHandlerContext ctx) {
@@ -40,8 +38,6 @@ public class MessageHandler {
     }
 
     public void handlerCaught(ChannelHandlerContext ctx, Throwable cause) {
-        Channel channel = ctx.channel();
-        channelClientRegister.unRegister(channel.id().asShortText());
         log.error(cause.getMessage(), cause);
     }
 
@@ -107,17 +103,19 @@ public class MessageHandler {
                 return;
             }
 
-            UserSession userSession;
-            if ((userSession = chatUserRegister.get(msg.getFrom())) != null) {
-                userSession.setStatus(UserStatus.ONLINE);
+            UserSession session;
+            if ((session = chatUserRegister.get(msg.getFrom())) != null) {
+                session.setStatus(UserStatus.ONLINE);
             } else {
-                userSession = new UserSession();
-                userSession.setSessionId(ctx.channel().id().asShortText());
-                userSession.setUsername(msg.getFrom());
-                userSession.setStatus(UserStatus.OFFLINE);
+                session = new UserSession();
+                session.setSessionId(ctx.channel().id().asShortText());
+                session.setUsername(msg.getFrom());
+                session.setStatus(UserStatus.OFFLINE);
             }
             retMsg.setBody(new Message(Constants.SUCCESS));
-            chatUserRegister.register(msg.getFrom(), userSession);
+
+            chatUserRegister.register(msg.getFrom(), session);
+            channelClientRegister.register(session.getSessionId(), ctx.channel());
         }
 
         @Override

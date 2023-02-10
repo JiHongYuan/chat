@@ -56,4 +56,14 @@ public class EventMessage {
                 .build();
     }
 
+    public EventMessage copy(){
+        EventMessage rst = new EventMessage();
+        rst.setMsgId(this.getMsgId());
+        rst.setFrom(this.getFrom());
+        rst.setTo(this.getTo());
+        rst.setEventType(this.getEventType());
+        rst.setSendTime(this.getSendTime());
+        return rst;
+    }
+
 }

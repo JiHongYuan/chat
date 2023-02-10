@@ -70,11 +70,9 @@ public class MainController extends AbstractController {
             // 增量刷新
             if (to.equals(selectedTo)) {
                 App.refreshUI(() -> jsObject.call("refreshMessage", JSON.toString(eventMessage)));
+            } else if (eventMessage == null) {
+                App.refreshUI(() -> jsObject.call("refreshMessageList", JSON.toString(userMessageMap.get(selectedTo))));
             }
-            // TODO 全量刷新
-            // else if (eventMessage == null) {
-            //    jsObject.call("refreshMessage", objectMapper.writeValueAsString(userMessageMap.get(to)));
-            // }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
@@ -106,17 +104,17 @@ public class MainController extends AbstractController {
         initializeGUI();
 
         if (initialized) return;
-        service.submit(() -> {
-            while (!Thread.interrupted()) {
-                try {
-                    EventMessage eventMessage = ApplicationContext.MESSAGE_QUEUE.take();
+
+        service.scheduleAtFixedRate(() -> {
+            try {
+                EventMessage eventMessage = ApplicationContext.MESSAGE_QUEUE.poll();
+                if(eventMessage != null){
                     App.refreshUI(() -> invokeMessageRefresh(eventMessage));
-                } catch (InterruptedException e) {
-                    log.error(e.getMessage(), e);
-                    Thread.currentThread().interrupt();
                 }
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
             }
-        });
+        }, 0, 3, TimeUnit.SECONDS);
         // TODO 刷新用户会把页面选中刷新
         service.scheduleAtFixedRate(this::refreshUserList, 0, 180, TimeUnit.SECONDS);
 

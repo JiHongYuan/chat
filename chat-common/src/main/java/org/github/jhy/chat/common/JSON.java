@@ -1,6 +1,7 @@
 package org.github.jhy.chat.common;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
@@ -9,7 +10,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class JSON {
 
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
+            .configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);;
 
     public static <T> T parseObject(String obj, Class<T> clazz) {
         try {

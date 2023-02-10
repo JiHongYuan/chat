@@ -18,10 +18,11 @@ public class EventMessageCodec extends MessageToMessageCodec<ByteBuf, EventMessa
 
     @Override
     protected void encode(ChannelHandlerContext ctx, EventMessage msg, List<Object> out) {
+        EventMessage rst = msg.copy();
         if (msg.getBody() != null) {
-            msg.setBody(JSON.toString(msg.getBody()));
+            rst.setBody(JSON.toString(msg.getBody()));
         }
-        String str = JSON.toString(msg);
+        String str = JSON.toString(rst);
         out.add(Unpooled.copiedBuffer(str, CharsetUtil.UTF_8));
     }
 
